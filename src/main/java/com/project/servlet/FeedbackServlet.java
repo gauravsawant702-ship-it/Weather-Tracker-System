@@ -51,26 +51,31 @@ public class FeedbackServlet extends HttpServlet {
             return;
         }
 
-        // Insert feedback into Oracle DB
+        // Insert feedback into PostgreSQL database
+        String sql = "INSERT INTO feedback "
+                + "(feedback_id, user_id, message, rating, feedback_date) "
+                + "VALUES (nextval('feedback_seq'), ?, ?, ?, CURRENT_TIMESTAMP)";
+
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement pst = con.prepareStatement(
-                     "INSERT INTO feedback (feedback_id, user_id, message, rating, feedback_date) VALUES (feedback_seq.NEXTVAL, ?, ?, ?, SYSDATE)"
-             )) {
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setInt(1, userId);
             pst.setString(2, message);
             pst.setInt(3, rating);
 
             int rows = pst.executeUpdate();
+
             if (rows > 0) {
                 response.sendRedirect("feedback_success.jsp");
             } else {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to save feedback.");
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "Failed to save feedback.");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error: " + e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Database error: " + e.getMessage());
         }
     }
 }

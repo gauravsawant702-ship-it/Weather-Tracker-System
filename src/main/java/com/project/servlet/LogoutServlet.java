@@ -8,15 +8,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-
 public class LogoutServlet extends HttpServlet {
 
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
-        HttpSession session = req.getSession();
-        session.invalidate();
+        HttpSession session = req.getSession(false);
 
-        res.sendRedirect("index.jsp");
+        if (session != null) {
+            session.invalidate();
+        }
+
+        res.sendRedirect(req.getContextPath() + "/index.jsp");
     }
 }
